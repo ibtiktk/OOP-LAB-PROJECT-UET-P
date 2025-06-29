@@ -1,6 +1,6 @@
 package cafeteria;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
 
 public class Student {
     private String name;
@@ -17,5 +17,5 @@ public class Student {
     public double getBalance() { return balance; }
     public void setBalance(double balance) { this.balance = balance; }
     public List<String> getOrderHistory() { return orderHistory; }
-    public void addOrder(String order) { orderHistory.add(order); }
+    public void addOrder(String item) { orderHistory.add(item); }
 }

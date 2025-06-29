@@ -1,4 +1,5 @@
 package cafeteria;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -28,12 +29,11 @@ public class MenuPage {
 
         JButton buySandwich = new JButton("Buy Sandwich ($5)");
         JButton buyDrink = new JButton("Buy Drink ($2)");
-        JButton viewOrders = new JButton("View Order History");
+        JButton viewOrders = new JButton("View Orders");
         JButton logoutBtn = new JButton("Logout");
 
         logoutBtn.setBackground(Color.RED);
         logoutBtn.setForeground(Color.WHITE);
-        logoutBtn.setFocusPainted(false);
 
         panel.add(welcome);
         panel.add(balanceLabel);
@@ -45,30 +45,33 @@ public class MenuPage {
         frame.add(panel);
         frame.setVisible(true);
 
-        buySandwich.addActionListener(e -> purchaseItem("Sandwich", 5));
-        buyDrink.addActionListener(e -> purchaseItem("Drink", 2));
+        buySandwich.addActionListener(e -> purchase("Sandwich", 5));
+        buyDrink.addActionListener(e -> purchase("Drink", 2));
         viewOrders.addActionListener(e -> showOrderHistory());
-        logoutBtn.addActionListener(e -> frame.dispose());
+        logoutBtn.addActionListener(e -> {
+            frame.dispose();
+            new Login();
+        });
     }
 
-    private void purchaseItem(String item, double cost) {
+    private void purchase(String item, double cost) {
         if (student.getBalance() >= cost) {
             student.setBalance(student.getBalance() - cost);
             student.addOrder(item + " - $" + cost);
             DBManager.updateBalance(student);
             balanceLabel.setText("Balance: $" + student.getBalance());
-            JOptionPane.showMessageDialog(frame, "You bought a " + item);
+            JOptionPane.showMessageDialog(frame, "You bought: " + item);
         } else {
-            JOptionPane.showMessageDialog(frame, "Insufficient balance.");
+            JOptionPane.showMessageDialog(frame, "Not enough balance.");
         }
     }
 
     private void showOrderHistory() {
         List<String> orders = student.getOrderHistory();
-        StringBuilder msg = new StringBuilder("Order History:\n");
+        StringBuilder sb = new StringBuilder("Order History:\n");
         for (String order : orders) {
-            msg.append("- ").append(order).append("\n");
+            sb.append("- ").append(order).append("\n");
         }
-        JOptionPane.showMessageDialog(frame, msg.toString());
+        JOptionPane.showMessageDialog(frame, sb.toString());
     }
 }

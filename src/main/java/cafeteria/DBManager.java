@@ -1,4 +1,5 @@
 package cafeteria;
+
 import java.sql.*;
 
 public class DBManager {
@@ -6,24 +7,50 @@ public class DBManager {
     private static final String USER = "root";
     private static final String PASSWORD = "Ibtisam@321";
 
-    public static void connect() {
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD)) {
-            if (conn != null) {
-                Statement stmt = conn.createStatement();
-                stmt.execute("CREATE TABLE IF NOT EXISTS students (name VARCHAR(100), balance DOUBLE)");
+    public static Connection connect() throws SQLException {
+        return DriverManager.getConnection(DB_URL, USER, PASSWORD);
+    }
+
+public static boolean addStudent(Student student, String pin) {
+    String sql = "INSERT INTO students(name, pin, balance) VALUES (?, ?, ?)";
+    try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, student.getName());
+        stmt.setString(2, pin);
+        stmt.setDouble(3, student.getBalance());
+        stmt.executeUpdate();
+        return true;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+    public static Student login(String name, String pin) {
+        String sql = "SELECT * FROM students WHERE name=? AND pin=?";
+        try (Connection conn = connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            stmt.setString(2, pin);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Student(
+                    rs.getString("name"),
+                    rs.getDouble("balance")
+                );
             }
         } catch (SQLException e) {
-            System.out.println("DB Error: " + e.getMessage());
+            e.printStackTrace();
         }
+        return null;
     }
 
     public static void updateBalance(Student student) {
-        String sql = "REPLACE INTO students(name, balance) VALUES (?, ?)";
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, student.getName());
-            pstmt.setDouble(2, student.getBalance());
-            pstmt.executeUpdate();
+        String sql = "UPDATE students SET balance = ? WHERE name = ?";
+        try (Connection conn = connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, student.getBalance());
+            stmt.setString(2, student.getName());
+            stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
